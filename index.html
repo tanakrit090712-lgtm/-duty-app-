@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duty Master Enterprise - ระบบจัดการเวรห้องเรียนที่ดีที่สุด</title>
+    <style>
+        /* 🌌 Premium Fantasy Dark Theme */
+        body { 
+            font-family: 'Kanit', sans-serif; 
+            background: linear-gradient(135deg, #0f172a 0%, #020617 100%); 
+            min-height: 100vh; margin: 0; padding: 20px; 
+            display: flex; flex-direction: column; align-items: center; 
+            color: #f8fafc; overflow-x: hidden;
+        }
+
+        /* 🕒 Top Live Dashboard Status */
+        .top-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
+        .clock-box { 
+            background: rgba(15, 23, 42, 0.6); color: #00f2fe; padding: 10px 20px; border-radius: 30px; 
+            font-size: 14px; font-weight: bold; backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 242, 254, 0.3); box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .live-dot { width: 8px; height: 8px; background-color: #38bdf8; border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; box-shadow: 0 0 10px #38bdf8; } }
+
+        /* 📢 ประกาศจากแอดมิน */
+        .announce-box {
+            background: linear-gradient(135deg, rgba(244, 63, 94, 0.2) 0%, rgba(225, 29, 72, 0.05) 100%);
+            border: 2px solid rgba(244, 63, 94, 0.5); box-shadow: 0 0 25px rgba(244, 63, 94, 0.3);
+            border-radius: 20px; padding: 20px; width: 100%; max-width: 500px;
+            margin-bottom: 25px; box-sizing: border-box; display: none; text-align: center;
+        }
+        .announce-title { font-weight: bold; color: #ff4b72; font-size: 16px; margin-bottom: 5px; }
+        #announceContent { font-size: 18px; font-weight: 600; color: #fff; white-space: pre-wrap; }
+
+        /* 📱 Navigation Menu */
+        .navbar { 
+            display: flex; flex-wrap: wrap; background: rgba(255, 255, 255, 0.05); padding: 6px; border-radius: 20px; 
+            backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 25px; width: 100%; max-width: 650px; justify-content: center; gap: 5px; box-sizing: border-box;
+        }
+        .nav-btn { 
+            background: none; border: none; padding: 8px 16px; font-size: 14px; font-weight: bold; 
+            color: #94a3b8; cursor: pointer; border-radius: 12px; transition: all 0.3s ease;
+        }
+        .nav-btn.active { background: linear-gradient(135deg, #38bdf8 0%, #4f46e5 100%); color: white; transform: scale(1.05); }
+
+        /* 🎬 Pages Design */
+        .page { 
+            background: rgba(30, 41, 59, 0.7); padding: 25px; border-radius: 20px; backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+            width: 100%; max-width: 500px; text-align: center; display: none; box-sizing: border-box; 
+        }
+        .page.active { display: block; animation: zoomInUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        @keyframes zoomInUp { from { opacity: 0; transform: scale(0.95) translateY(15px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        h1 { font-size: 24px; margin-top: 0; background: linear-gradient(to right, #38bdf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h2 { background: linear-gradient(to right, #38bdf8, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h3 { color: #38bdf8; margin-top: 0; margin-bottom: 10px; }
+        label { display: block; text-align: left; margin-bottom: 6px; font-weight: bold; color: #cbd5e1; font-size: 13px; }
+        
+        input[type="text"], input[type="date"], input[type="number"], input[type="time"], select, textarea { 
+            width: 100%; padding: 10px; margin-bottom: 12px; border-radius: 8px; 
+            background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); 
+            color: #fff; font-size: 15px; box-sizing: border-box; font-family: 'Kanit';
+        }
+
+        .btn-general { background: linear-gradient(135deg, #38bdf8 0%, #4f46e5 100%); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 10px; }
+        .btn-capture { background: linear-gradient(135deg, #a855f7 0%, #6b21a8 100%); color: white; padding: 10px; border-radius: 8px; width: 100%; display: inline-block; margin-bottom: 12px; cursor: pointer; font-weight: bold; text-align: center; box-sizing: border-box; }
+        .btn-duty { background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%); color: white; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 25px; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3); }
+        .preview-box { max-width: 100%; max-height: 150px; border-radius: 8px; margin-bottom: 12px; display: none; border: 2px solid #38bdf8; }
+
+        /* 📊 ตารางแสดงข้อมูล */
+        .table-responsive { overflow-x: auto; margin-top: 10px; border-radius: 8px; background: rgba(15, 23, 42, 0.4); }
+        table { width: 100%; border-collapse: collapse; color: #e2e8f0; font-size: 13px; }
+        th, td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        th { background-color: rgba(15, 23, 42, 0.8); color: #38bdf8; }
+        
+        .badge-success { background: #16a34a; color: white; padding: 2px 6px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+        .badge-danger { background: #dc2626; color: white; padding: 2px 6px; border-radius: 10px; font-size: 11px; font-weight: bold; }
+
+        /* ⚙️ Admin Panel Layout */
+        .report-section { background: rgba(15, 23, 42, 0.98); padding: 25px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); border: 2px solid #38bdf8; width: 100%; max-width: 1100px; display: none; margin-top: 35px; box-sizing: border-box; }
+        .report-section.active-admin { display: block; animation: zoomInUp 0.5s ease forwards; }
+        .setup-box { background: rgba(30, 41, 59, 0.5); padding: 18px; border-radius: 14px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.08); text-align: left; }
+        
+        .grid-summary { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 6px; margin-top: 10px; }
+        .grid-item { padding: 8px 4px; border-radius: 8px; text-align: center; font-size: 11px; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .grid-item:hover { transform: scale(1.08); box-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        .status-done { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); }
+        .status-missing { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+
+        /* 🎰 Lucky Wheel */
+        .wheel-container { padding: 12px; background: #0f172a; border-radius: 12px; border: 2px dashed #38bdf8; font-size: 16px; font-weight: bold; color: #00f2fe; margin-top: 10px; text-align: center; }
+
+        /* 🏆 Leaderboard Progress Bars */
+        .progress-container { margin-bottom: 12px; }
+        .progress-bar-bg { background: rgba(255,255,255,0.08); border-radius: 10px; height: 14px; width: 100%; overflow: hidden; margin-top: 5px; }
+        .progress-bar-fill { background: linear-gradient(90deg, #38bdf8, #a855f7); height: 100%; width: 0%; transition: width 0.5s ease; }
+        .memo-item { background: rgba(255, 255, 255, 0.04); padding: 12px; border-radius: 10px; margin-bottom: 8px; border-left: 4px solid #38bdf8; text-align: left; font-size: 13px; }
+        
+        /* ปุ่มเข้าแอดมินล่างสุด */
+        .admin-trigger { 
+            margin-top: 35px; font-size: 13px; color: #94a3b8; cursor: pointer; 
+            padding: 10px 20px; background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.15); 
+            border-radius: 30px; transition: all 0.3s; width: auto; font-family: 'Kanit';
+        }
+        .admin-trigger:hover { background: rgba(239, 68, 68, 0.1); color: #f87171; border-color: #ef4444; }
+
+        /* 🗺️ Interactive Zone Mini-Map */
+        .map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .zone-btn { background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; padding: 10px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: 'Kanit'; font-weight: bold; }
+        .zone-btn.selected { background: rgba(56, 189, 248, 0.2); border-color: #38bdf8; color: #38bdf8; }
+        
+        .time-limit-badge {
+            background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px dashed #ef4444;
+            padding: 8px; border-radius: 8px; font-size: 13px; font-weight: bold; margin-bottom: 15px; text-align: center;
+        }
+
+        /* 🎛️ Editor Panel Quick Form Styles */
+        .btn-update { background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #020617; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-family: 'Kanit'; font-size: 14px; transition: opacity 0.2s; }
+        .btn-update:hover { opacity: 0.9; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="clock-box">
+        <div class="live-dot"></div>
+        <span>LIVE: </span><span id="timeShow">...</span>
+    </div>
+    <div class="clock-box" style="color:#e9d5ff; border-color: rgba(168,85,247,0.3);" id="streakShow">🔥 Streak โหลด...</div>
+</div>
+
+<div class="announce-box" id="globalAnnouncement">
+    <div class="announce-title">📢 ประกาศจากหัวหน้าเวร</div>
+    <div id="announceContent"></div>
+</div>
+
+<div class="navbar">
+    <button class="nav-btn active" onclick="switchPage('submit-page', this)">🚀 บันทึกเข้าเวร</button>
+    <button class="nav-btn" onclick="switchPage('leaderboard-page', this)">🏆 สถิติความขยัน</button>
+    <button class="nav-btn" onclick="switchPage('leave-page', this)">🎫 ยื่นใบลาเวร</button>
+    <button class="nav-btn" onclick="switchPage('lost-page', this)">📦 ของตกค้าง</button>
+    <button class="nav-btn" onclick="switchPage('confess-page', this)">💬 บอร์ดสารภาพบาป</button>
+</div>
+
+<div id="submit-page" class="page active">
+    <h1>📝 บันทึกข้อมูลเข้าเวร</h1>
+    <div class="time-limit-badge" id="timeLimitNotice">⏳ ระบบเปิดรับยอดรายงานถึงเวลา: 16:30 น. ของทุกวัน</div>
+    
+    <label>🔢 ระบุเลขที่กลุ่ม (เว้นวรรค เช่น 12 17 18):</label>
+    <input type="text" id="userNoList" placeholder="ตัวอย่าง: 12 17 18 29">
+    
+    <label>📅 วันที่ปฏิบัติหน้าที่:</label>
+    <input type="date" id="dutyDate" onchange="checkSelectedDayLabel()">
+    <div id="dayLabelNotice" style="font-size: 13px; color: #38bdf8; font-weight: bold; margin-bottom: 12px; margin-top: -8px;"></div>
+    
+    <label>🗺️ ติ๊กโซนพื้นที่ทำความสะอาดสำเร็จวันนี้ (Interactive Map):</label>
+    <div class="map-grid">
+        <button class="zone-btn" id="zone1" onclick="toggleZone('zone1', 'หน้ากระดาน & โต๊ะครู')">🔲 หน้ากระดาน & โต๊ะครู</button>
+        <button class="zone-btn" id="zone2" onclick="toggleZone('zone2', 'หลังห้อง & ถังขยะ')">🔲 หลังห้อง & ถังขยะ</button>
+        <button class="zone-btn" id="zone3" onclick="toggleZone('zone3', 'แถวโต๊ะนักเรียน')">🔲 แถวโต๊ะนักเรียน</button>
+        <button class="zone-btn" id="zone4" onclick="toggleZone('zone4', 'ระเบียง & หน้าต่าง')">🔲 ระเบียง & หน้าต่าง</button>
+    </div>
+
+    <label>📸 เปิดกล้องถ่ายภาพยืนยันกลุ่ม:</label>
+    <label for="imageInput" class="btn-capture">📷 กดเพื่อเปิดกล้องถ่ายภาพสด</label>
+    <input type="file" id="imageInput" accept="image/*" capture="camera" style="display:none;" onchange="previewImage(event)">
+    <img id="imgPreview" class="preview-box">
+    
+    <button class="btn-duty" id="submitBtn" onclick="recordDuty()">บันทึกการเข้าเวรสำเร็จ!</button>
+    
+    <button class="admin-trigger" onclick="loginAdmin()">🔒 เข้าสู่แผงจัดการแอดมินหลังบ้าน</button>
+</div>
+
+<div id="leaderboard-page" class="page">
+    <h1>🏆 ทำเนียบความรับผิดชอบกลุ่มวัน</h1>
+    <div id="leaderboardContainer" style="text-align:left; margin-top:15px;"></div>
+</div>
+
+<div id="leave-page" class="page">
+    <h1>🎫 ยื่นใบลาเวรดิจิทัล</h1>
+    <label>เลขที่ของฉัน:</label>
+    <input type="number" id="leaveNo" placeholder="ระบุเลขที่ตัวเอง">
+    <label>วันที่ขอลาเวร:</label>
+    <input type="date" id="leaveDate">
+    <label>ระบุเหตุผลความจำเป็น & คนทำแทน:</label>
+    <textarea id="leaveReason" rows="2" placeholder="เช่น ติดซ้อมฟุตบอลโรงเรียน มีเลขที่ 13 มาสลับสัปดาห์นี้แทนครับ"></textarea>
+    <button class="btn-general" onclick="submitLeave()">ส่งใบลาให้หัวหน้าเวรตรวจ</button>
+    <h3 style="margin-top:15px; font-size:14px;">📋 ประวัติสถานะใบลาเวร</h3>
+    <div id="leaveStatusList"></div>
+</div>
+
+<div id="lost-page" class="page">
+    <h1>📦 Lost & Found ของตกค้างใต้โต๊ะ</h1>
+    <label>พบของลืมทิ้งไว้ พิมพ์แจ้งเตือนเจ้าของ:</label>
+    <input type="text" id="lostItemName" placeholder="เช่น เจอเสื้อกันหนาวสีกรม ตกอยู่หลังห้อง">
+    <button class="btn-general" style="background:linear-gradient(135deg,#a855f7,#6b21a8);" onclick="submitLostItem()">📢 โพสต์แจ้งเข้าสู่แอป</button>
+    <h3 style="margin-top:15px; font-size:14px;">📦 รายการของที่รอเจ้าของมารับคืน</h3>
+    <div id="lostItemsList"></div>
+</div>
+
+<div id="confess-page" class="page">
+    <h1>💬 บอร์ดสารภาพบาปนิรนาม</h1>
+    <p style="font-size:11px; color:#f87171; margin-top:-10px;">ลืมเข้าเวรหรืออู้? พิมพ์ขอโทษเพื่อนกลุ่มวันได้แบบปิดชื่อเป็นความลับ</p>
+    <textarea id="confessText" rows="3" placeholder="วันนี้เราติดธุระด่วนเลยไม่ได้ช่วยกวาดเลย..."></textarea>
+    <button class="btn-general" style="background:#e11d48;" onclick="submitConfession()">ส่งข้อความลงบอร์ด</button>
+    <div id="confessionContainer" style="margin-top:15px;"></div>
+</div>
+
+<div class="report-section" id="adminPanel">
+    <h2 style="margin-top: 0; text-align:center;">📊 แผงควบคุมและแก้ไขค่าระบบเวรทั้งหมด (Admin Console)</h2>
+    
+    <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
+        <button onclick="copyLineReport()" style="background:#22c55e; color:white; padding:10px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; flex:1;">📋 ก๊อปปี้สรุปคนโดดส่ง LINE ห้อง</button>
+        <button onclick="spinLuckyInspector()" style="background:#38bdf8; color:black; padding:10px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; flex:1;">🎰 สุ่มคนดวงดีตรวจห้องแทน</button>
+        <button onclick="triggerSirenPanic()" style="background:#ef4444; color:white; padding:10px; border:none; border-radius:8px; font-weight:bold; cursor:pointer; flex:1;">⚡ ปุ่มไซเรนทวงยอดเวรด่วน</button>
+    </div>
+
+    <div id="luckyWheelResult" class="wheel-container" style="display:none;"></div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px; margin-bottom: 20px;">
+        <div class="setup-box" style="border: 1px solid #fbbf24; background: rgba(251, 191, 36, 0.05);">
+            <h3 style="color:#fbbf24;">✍️ แก้ไข/เพิ่มคะแนนกลุ่มวันตรงๆ</h3>
+            <label>เลือกกลุ่มวัน:</label>
+            <select id="editGroupSelect">
+                <option value="วันจันทร์">วันจันทร์</option>
+                <option value="วันอังคาร">วันอังคาร</option>
+                <option value="วันพุธ">วันพุธ</option>
+                <option value="วันพฤหัสบดี">วันพฤหัสบดี</option>
+                <option value="วันศุกร์">วันศุกร์</option>
+            </select>
+            <label>กรอกจำนวนคะแนนใหม่ที่ต้องการให้เป็น:</label>
+            <input type="number" id="editGroupScoreInput" placeholder="ตัวอย่าง: 50">
+            <button class="btn-update" onclick="updateGroupScoreDirect()">💾 บันทึกคะแนนกลุ่มใหม่</button>
+        </div>
+
+        <div class="setup-box" style="border: 1px solid #c084fc; background: rgba(192, 132, 252, 0.05);">
+            <h3 style="color:#c084fc;">✍️ แก้ไข/แต่งตัวเลขกองไฟ Streak</h3>
+            <label>เลือกกลุ่มวัน:</label>
+            <select id="editStreakSelect">
+                <option value="วันจันทร์">วันจันทร์</option>
+                <option value="วันอังคาร">วันอังคาร</option>
+                <option value="วันพุธ">วันพุธ</option>
+                <option value="วันพฤหัสบดี">วันพฤหัสบดี</option>
+                <option value="วันศุกร์">วันศุกร์</option>
+            </select>
+            <label>ระบุจำนวนสัปดาห์ Streak ใหม่:</label>
+            <input type="number" id="editStreakInput" placeholder="ตัวอย่าง: 5">
+            <button class="btn-update" style="background:linear-gradient(135deg, #c084fc 0%, #7c3aed 100%); color:white;" onclick="updateStreakDirect()">💾 บันทึกค่า Streak ใหม่</button>
+        </div>
+
+        <div class="setup-box" style="border: 1px solid #22d55e; background: rgba(34, 213, 94, 0.05);">
+            <h3 style="color:#22d55e;">✍️ แก้ไขสถานะไฟรายบุคคล (ลัด)</h3>
+            <label>ใส่เลขที่นักเรียนที่ต้องการแก้ไข (1-40):</label>
+            <input type="number" id="editUserNoInput" min="1" max="40" placeholder="ระบุเลขที่">
+            <label>เลือกสถานะไฟ:</label>
+            <select id="editUserStatusSelect">
+                <option value="1">🟢 ส่งแล้ว (ไฟเขียว)</option>
+                <option value="0">🔴 ขาด/โดดเวร (ไฟแดง)</option>
+            </select>
+            <button class="btn-update" style="background:linear-gradient(135deg, #34d399 0%, #059669 100%); color:white;" onclick="updateUserStatusDirect()">💾 ปรับสถานะไฟทันที</button>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 20px;">
+        <div class="setup-box" style="border-top: 4px solid #38bdf8;">
+            <h3>📅 ตารางเช็กชื่อเวรแยกตามวันสัปดาห์นี้</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>วันปฏิบัติหน้าที่</th><th>คิวเลขที่</th><th>สถานะการส่งงานประจำสัปดาห์</th></tr></thead>
+                    <tbody id="dailyDutyTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="setup-box" style="border-top: 4px solid #4ade80;">
+            <h3>🧐 แผงตรวจสอบสถานะไฟรายบุคคล (คลิกที่ตัวกล่องเพื่อสลับไฟ เขียว/แดง ได้เลย!)</h3>
+            <div class="grid-summary" id="roomSummaryGrid"></div>
+        </div>
+    </div>
+
+    <div class="setup-box" style="margin-top:20px; border-left:4px solid #a855f7;">
+        <h3>🎫 ตู้ไปรษณีย์จัดการใบลาเวรของเพื่อน ๆ ในห้อง</h3>
+        <div id="adminLeaveContainer">ไม่มีใบลาค้างตรวจสอบ</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top:20px;">
+        <div class="setup-box">
+            <h3>📥 ประวัติรายงานรูปภาพคู่เวรล่าสุด</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead><tr><th>รูป</th><th>เลขที่และพื้นที่โซน</th><th>เวลาบันทึก</th><th>ลบ</th></tr></thead>
+                    <tbody id="reportTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div>
+            <div class="setup-box" style="border-left: 4px solid #00f2fe;">
+                <h3>⏰ ตั้งค่ากำหนดเวลาสิ้นสุดการส่งรายงาน (ทุกวัน)</h3>
+                <label>ระบุเวลาปิดรับยอดประจำวัน:</label>
+                <input type="time" id="endTimeInput" value="16:30">
+                <button style="width:100%; padding:10px; background:linear-gradient(135deg, #38bdf8 0%, #4f46e5 100%); border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer;" onclick="updateEndTimeSetting()">💾 บันทึกเวลาปิดระบบ</button>
+            </div>
+
+            <div class="setup-box" style="border-left: 4px solid #ef4444;">
+                <h3 style="color:#ef4444;">🧹 เมนูล้างสถิติและรีเซ็ตระบบ</h3>
+                <p style="font-size:11px; color:#94a3b8; margin-bottom:10px;">*เลือกปุ่มล้างข้อมูลที่ต้องการใช้งานเพื่อขึ้นรอบใหม่</p>
+                <button style="width:100%; padding:8px; background:#ef4444; border:none; border-radius:6px; color:white; font-weight:bold; cursor:pointer; margin-bottom:8px;" onclick="resetWeeklyStats()">🔴 ล้างไฟเขียวรายคน (เลขที่ 1-40)</button>
+                <button style="width:100%; padding:8px; background:#f97316; border:none; border-radius:6px; color:white; font-weight:bold; cursor:pointer; margin-bottom:8px;" onclick="resetGroupScores()">🟠 รีเซ็ตคะแนนกลุ่มวัน เป็น 0</button>
+                <button style="width:100%; padding:8px; background:#b45309; border:none; border-radius:6px; color:white; font-weight:bold; cursor:pointer;" onclick="resetStreaks()">🟤 รีเซ็ตสถิติทำต่อเนื่อง (Streak)</button>
+            </div>
+
+            <div class="setup-box" style="border-left: 4px solid #f43f5e;">
+                <h3>📢 ปล่อยประกาศเตือน/คำชมประจำวันลงหน้าแรก</h3>
+                <input type="text" id="announceInput" placeholder="พิมพ์ข้อความที่ต้องการแจ้งเพื่อน...">
+                <button style="width:100%; padding:10px; background:linear-gradient(135deg, #f43f5e 0%, #be123c 100%); border:none; border-radius:8px; color:white; font-weight:bold; cursor:pointer;" onclick="updateAnnouncement()">📣 ปล่อยประกาศทันที</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const dutyMasterSchedule = {
+        "วันจันทร์": [12, 17, 18, 29, 33, 19, 34, 7],
+        "วันอังคาร": [2, 3, 4, 5, 11, 35, 38, 20],
+        "วันพุธ": [14, 15, 16, 21, 27, 28, 32, 37],
+        "วันพฤหัสบดี": [6, 9, 24, 22, 25, 39, 8, 10],
+        "วันศุกร์": [1, 13, 23, 26, 30, 31, 40, 36]
+    };
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyAGkK7xGMHqS-i5Gv850eTPwDv6yonyn5E",
+        authDomain: "my-duty-app-658a3.firebaseapp.com",
+        databaseURL: "https://my-duty-app-658a3-default-rtdb.firebaseio.com",
+        projectId: "my-duty-app-658a3",
+        storageBucket: "my-duty-app-658a3.firebasestorage.app",
+        messagingSenderId: "29679488131",
+        appId: "1:29679488131:web:f0c3b72fa491c65e349436",
+        measurementId: "G-WPXZBPVDN9"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    let base64ImageString = "";
+    let currentAdminPass = "admin1234";
+    let globalStatsCache = {};
+    let selectedZones = [];
+    let systemEndTimeStr = "16:30"; 
+
+    function getThaiDateString(dateObj) {
+        const year = dateObj.toLocaleDateString('en-US', {year: 'numeric'});
+        const month = dateObj.toLocaleDateString('en-US', {month: '2-digit'});
+        const day = dateObj.toLocaleDateString('en-US', {day: '2-digit'});
+        return `${year}-${month}-${day}`;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("dutyDate").value = getThaiDateString(new Date());
+        checkSelectedDayLabel(); updateClock(); setInterval(updateClock, 1000);
+        listenAnnouncement(); listenStreak(); listenLostItems(); listenConfessions(); listenLeaderboard(); listenEndTimeSetting();
+    });
+
+    function updateClock() {
+        const now = new Date();
+        document.getElementById("timeShow").innerText = now.toLocaleDateString('th-TH', { month: 'short', day: 'numeric' }) + " " + now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + " น.";
+    }
+
+    function switchPage(pageId, btn) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active'); btn.classList.add('active');
+    }
+
+    function checkSelectedDayLabel() {
+        const dateVal = document.getElementById("dutyDate").value; if(!dateVal) return;
+        const dayOfWeek = new Date(dateVal).getDay();
+        const dayNames = ["วันอาทิตย์", "วันจันทร์", "วันอังคาร", "วันพุธ", "วันพฤหัสบดี", "วันศุกร์", "วันเสาร์"];
+        const currentDayName = dayNames[dayOfWeek];
+        const noticeBox = document.getElementById("dayLabelNotice");
+        if (dutyMasterSchedule[currentDayName]) {
+            noticeBox.innerText = `📅 ตรวจพบคิวปฏิบัติหน้าที่ของ ${currentDayName} (เลขที่: ${dutyMasterSchedule[currentDayName].join(', ')})`;
+            noticeBox.style.color = "#38bdf8";
+        } else {
+            noticeBox.innerText = `⚠️ วันที่เลือกคือ ${currentDayName} (ไม่มีคิวเวรที่ลงล็อกไว้ในระบบจ้า)`;
+            noticeBox.style.color = "#ef4444";
+        }
+    }
+
+    function toggleZone(zoneId, zoneName) {
+        const btn = document.getElementById(zoneId);
+        if (selectedZones.includes(zoneName)) {
+            selectedZones = selectedZones.filter(z => z !== zoneName);
+            btn.classList.remove('selected'); btn.innerText = "🔲 " + zoneName;
+        } else {
+            selectedZones.push(zoneName);
+            btn.classList.add('selected'); btn.innerText = "✅ " + zoneName;
+        }
+    }
+
+    function previewImage(event) {
+        const file = event.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image(); img.src = e.target.result;
+            img.onload = function() {
+                const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+                let width = img.width; let height = img.height;
+                if (width > 400) { height *= 400 / width; width = 400; }
+                const cvs = document.createElement('canvas'); cvs.width = width; cvs.height = height;
+                cvs.getContext('2d').drawImage(img, 0, 0, width, height);
+                base64ImageString = cvs.toDataURL('image/jpeg', 0.6);
+                const preview = document.getElementById("imgPreview"); preview.src = base64ImageString; preview.style.display = "block";
+            }
+        }
+        reader.readAsDataURL(file);
+    }
+
+    function listenEndTimeSetting() {
+        database.ref('adminSettings/endTime').on('value', snapshot => {
+            if (snapshot.exists() && snapshot.val()) {
+                systemEndTimeStr = snapshot.val();
+                document.getElementById("endTimeInput").value = systemEndTimeStr;
+                document.getElementById("timeLimitNotice").innerText = `⏳ ระบบเปิดรับยอดรายงานถึงเวลา: ${systemEndTimeStr} น. ของทุกวัน`;
+            }
+        });
+    }
+
+    function updateEndTimeSetting() {
+        const newTime = document.getElementById("endTimeInput").value;
+        if (!newTime) { alert("กรุณาเลือกเวลาให้ถูกต้องก่อนกดบันทึกน้า"); return; }
+        database.ref('adminSettings').update({ endTime: newTime }).then(() => {
+            alert(`⏰ อัปเดตเวลาปิดระบบเรียบร้อยแล้วจ้า!`);
+        });
+    }
+
+    function recordDuty() {
+        const rawInput = document.getElementById("userNoList").value.trim();
+        const dateInput = document.getElementById("dutyDate").value;
+        const submitBtn = document.getElementById("submitBtn");
+        if (!dateInput) { alert("กรุณาเลือกวันที่เข้าเวรก่อนนะจ๊ะ!"); return; }
+        const todayStr = getThaiDateString(new Date());
+        if (dateInput !== todayStr) { alert("🔒 ระบบอนุญาตให้ส่งรายงานได้เฉพาะวันที่ปัจจุบันเท่านั้นน้า!"); return; }
+
+        const now = new Date();
+        const currentTotalMinutes = (now.getHours() * 60) + now.getMinutes(); 
+        let finalLimitStr = systemEndTimeStr || "16:30";
+        const [limitHour, limitMinute] = finalLimitStr.split(':').map(Number);
+        const limitTotalMinutes = (limitHour * 60) + limitMinute; 
+
+        if (currentTotalMinutes > limitTotalMinutes || currentTotalMinutes < 300) {
+            alert(`🔒 หมดเวลาส่งรายงานเวรของวันนี้แล้วจ้า (${finalLimitStr} น.)`); return;
+        }
+
+        if (rawInput === "" || selectedZones.length === 0 || base64ImageString === "") { alert("กรุณากรอกข้อมูล ติ๊กโซน และถ่ายรูปให้ครบจ้า!"); return; }
+        const dayOfWeek = new Date(dateInput).getDay();
+        const dayNames = ["วันอาทิตย์", "วันจันทร์", "วันอังคาร", "วันพุธ", "วันพฤหัสบดี", "วันศุกร์", "วันเสาร์"];
+        const selectedDayName = dayNames[dayOfWeek];
+        const allowedNumbers = dutyMasterSchedule[selectedDayName];
+        const detectedNumbers = rawInput.match(/\d+/g);
+        if (!detectedNumbers) return;
+        
+        const passedNumbers = [];
+        detectedNumbers.forEach(numStr => {
+            const num = parseInt(numStr);
+            if (allowedNumbers.includes(num) && !passedNumbers.includes(num)) passedNumbers.push(num);
+        });
+
+        if (passedNumbers.length === 0) { alert(`❌ เลขที่ระบุมา ไม่มีชื่ออยู่ในคิวเวรประจำ${selectedDayName} เลยจ้า!`); return; }
+
+        submitBtn.disabled = true;
+        const thaiDate = new Date(dateInput).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+        const logTime = new Date().toLocaleDateString('th-TH', {month:'short', day:'numeric'}) + " " + new Date().toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'}) + " น.";
+        const fullReportText = `[${selectedDayName}] เลขที่ ${passedNumbers.sort((a,b)=>a-b).join(", ")} | โซน: ${selectedZones.join('/')}`;
+
+        database.ref('dutyLogs').push({
+            name: fullReportText, dutyDate: thaiDate, logTime: logTime, imageData: base64ImageString, timestamp: firebase.database.ServerValue.TIMESTAMP
+        }).then(() => {
+            passedNumbers.forEach(num => database.ref('weeklyStats/' + num).set(1));
+            database.ref('leaderboardScores/' + selectedDayName).transaction(v => (v || 0) + 10);
+            database.ref('streaks/' + selectedDayName).set(firebase.database.ServerValue.increment(1));
+            alert("🎉 บันทึกเข้าเวรส่งยอดเข้าฐานข้อมูลเรียบร้อย!");
+            location.reload();
+        });
+    }
+
+    /* 🔑 ปรับปรุงระบบล็อกอินแบบเซฟตี้ ป้องกันเบราว์เซอร์บล็อก Prompt ค้าง */
+    function loginAdmin() {
+        setTimeout(() => {
+            const input = prompt("กรุณาใส่รหัสผ่านผู้ดูแลระบบสำหรับเข้าใช้งานหลังบ้าน:");
+            if (input === null) return; // กด Cancel ไม่ทำอะไร
+            if (input.trim() === currentAdminPass) {
+                document.getElementById("adminPanel").classList.add('active-admin'); 
+                loadAdminData(); listenWeeklyStatsAndRenderTables(); listenAdminLeaves();
+                document.getElementById("adminPanel").scrollIntoView({ behavior: 'smooth' });
+            } else { 
+                alert("❌ รหัสผ่านไม่ถูกต้อง! (ลองเช็กตัวพิมพ์เล็ก-ใหญ่ดูอีกทีน้า)"); 
+            }
+        }, 100);
+    }
+
+    function listenWeeklyStatsAndRenderTables() {
+        database.ref('weeklyStats').on('value', snapshot => {
+            const statsData = snapshot.val() || {}; globalStatsCache = statsData;
+            const grid = document.getElementById("roomSummaryGrid"); grid.innerHTML = "";
+            for (let i = 1; i <= 40; i++) {
+                const div = document.createElement("div"); const isDone = statsData[i] && statsData[i] > 0;
+                div.className = "grid-item " + (isDone ? "status-done" : "status-missing");
+                div.innerHTML = `ลท.${i}<br><span style="font-size:9px;">${isDone ? "ทำแล้ว" : "🔴 ขาด"}</span>`;
+                div.onclick = () => { toggleUserStatusViaClick(i, isDone ? 0 : 1); };
+                grid.appendChild(div);
+            }
+
+            const tableBody = document.getElementById("dailyDutyTableBody"); tableBody.innerHTML = "";
+            Object.keys(dutyMasterSchedule).forEach(dayName => {
+                const tr = document.createElement("tr"); const members = dutyMasterSchedule[dayName];
+                let statusHtml = '<div style="display:flex; flex-wrap:wrap; gap:4px; justify-content:center;">';
+                members.forEach(num => {
+                    if (statsData[num] && statsData[num] > 0) statusHtml += `<span class="badge-success">ลท.${num} ส่งแล้ว</span>`;
+                    else statusHtml += `<span class="badge-danger">ลท.${num} ขาด</span>`;
+                });
+                statusHtml += '</div>';
+                tr.innerHTML = `<td style="font-weight:bold; color:#38bdf8;">${dayName}</td><td>${members.join(', ')}</td><td>${statusHtml}</td>`;
+                tableBody.appendChild(tr);
+            });
+        });
+    }
+
+    function updateGroupScoreDirect() {
+        const group = document.getElementById("editGroupSelect").value;
+        const score = document.getElementById("editGroupScoreInput").value;
+        if(score === "") { alert("กรุณาใส่จำนวนคะแนนก่อนกดน้า"); return; }
+        database.ref('leaderboardScores/' + group).set(parseInt(score)).then(() => {
+            alert(`✍️ แก้ไขคะแนนสะสมของ [กลุ่ม${group}] เป็น ${score} คะแนนเรียบร้อยค๊าบ!`);
+            document.getElementById("editGroupScoreInput").value = "";
+        });
+    }
+
+    document.getElementById("editGroupScoreInput")?.addEventListener("keydown", function(e) { if(e.key === "Enter") updateGroupScoreDirect(); });
+
+    function updateStreakDirect() {
+        const group = document.getElementById("editStreakSelect").value;
+        const streakVal = document.getElementById("editStreakInput").value;
+        if(streakVal === "") { alert("กรุณาใส่จำนวนสัปดาห์ Streak ก่อนกดน้า"); return; }
+        database.ref('streaks/' + group).set(parseInt(streakVal)).then(() => {
+            alert(`✍️ ปรับแต่งสถิติ Streak ของ [กลุ่ม${group}] เป็น ${streakVal} สัปดาห์สำเร็จ!`);
+            document.getElementById("editStreakInput").value = "";
+        });
+    }
+
+    function updateUserStatusDirect() {
+        const num = document.getElementById("editUserNoInput").value;
+        const status = parseInt(document.getElementById("editUserStatusSelect").value);
+        if(!num || num < 1 || num > 40) { alert("กรุณาระบุเลขที่ให้ถูกต้อง (1-40) จ้า!"); return; }
+        toggleUserStatusViaClick(num, status);
+        document.getElementById("editUserNoInput").value = "";
+    }
+
+    function toggleUserStatusViaClick(userNo, targetStatus) {
+        if(targetStatus === 1) { database.ref('weeklyStats/' + userNo).set(1); } 
+        else { database.ref('weeklyStats/' + userNo).remove(); }
+    }
+
+    function copyLineReport() {
+        let text = `📢 รายชื่อสรุปคนขาดเวรประจำสัปดาห์นี้:\n`; let totalMissing = 0;
+        Object.keys(dutyMasterSchedule).forEach(dayName => {
+            let missingInDay = [];
+            dutyMasterSchedule[dayName].forEach(num => {
+                if(!globalStatsCache[num] || globalStatsCache[num] <= 0) { missingInDay.push(num); totalMissing++; }
+            });
+            if(missingInDay.length > 0) text += `📌 วัน${dayName}: เลขที่ ${missingInDay.join(', ')}\n`;
+        });
+        if(totalMissing === 0) text += `\n🎉 สัปดาห์นี้ห้องเราทำเวรครบ 100% ไม่มีคนโดดเวรเลยจ้า!`;
+        navigator.clipboard.writeText(text).then(() => alert("📋 ก๊อปปี้สรุปเข้าคลิปบอร์ดแล้ว!"));
+    }
+
+    function spinLuckyInspector() {
+        const box = document.getElementById("luckyWheelResult"); box.style.display = "block"; box.innerText = "🎰 วงล้อกำลังสุ่มหาผู้โชคดี...";
+        setTimeout(() => {
+            const luckyNum = Math.floor(Math.random() * 40) + 1;
+            box.innerText = `🎉 ขอแสดงความยินดีกับ "เลขที่ ${luckyNum}" ได้รับสิทธิ์เป็นผู้ช่วยเดินตรวจห้องแทนหัวหน้าเย็นนี้จ้า! ✨`;
+        }, 1200);
+    }
+
+    function triggerSirenPanic() {
+        database.ref('adminSettings').update({ announcement: "🚨 [ไซเรนแจ้งเตือนเร่งด่วน] กลุ่มเวรวันนี้ยังไม่ได้ส่งยอดรายงานความสะอาดเลยนะจ๊ะ รบกวนรีบจัดการและถ่ายภาพส่งก่อนระบบล็อกด้วยน้า!!" });
+        alert("⚡ ส่งประกาศไซเรนด่วนไปหน้าแรกเรียบร้อย!");
+    }
+
+    function resetWeeklyStats() {
+        if(confirm("🚨 ต้องการล้างตารางสถานะไฟเช็กชื่อรายคนใช่ไหมค๊าบ?")) {
+            database.ref('weeklyStats').remove().then(() => alert("🧹 รีเซ็ตสถานะกล่องไฟรายคนสำเร็จเรียบร้อย!"));
+        }
+    }
+
+    function resetGroupScores() {
+        if(confirm("🏆 คุณแน่ใจใช่ไหมว่าต้องการ 'รีเซ็ตคะแนนสะสมกลุ่มวัน' ทั้งหมดให้กลับเป็น 0")) {
+            database.ref('leaderboardScores').remove().then(() => alert("🧹 รีเซ็ตคะแนนสะสมกลุ่มวันเป็น 0 เรียบร้อยแล้วค๊าบ!"));
+        }
+    }
+
+    function resetStreaks() {
+        if(confirm("🔥 ต้องการรีเซ็ตค่าสัปดาห์ทำต่อเนื่อง (Streak) ของทุกกลุ่มวันใช่ไหมจ๊ะ?")) {
+            database.ref('streaks').remove().then(() => alert("🧹 รีเซ็ตค่า Streak เรียบร้อยแล้วค๊าบ!"));
+        }
+    }
+
+    function updateAnnouncement() { database.ref('adminSettings').update({ announcement: document.getElementById("announceInput").value.trim() }).then(() => alert("📢 อัปเดตกล่องข้อความแจ้งเตือนสำเร็จ!")); }
+    function listenAnnouncement() { database.ref('adminSettings/announcement').on('value', s => { const box = document.getElementById("globalAnnouncement"); if(s.exists() && s.val() !== "") { document.getElementById("announceContent").innerText = s.val(); box.style.display = "block"; } else { box.style.display = "none"; } }); }
+
+    function submitLeave() {
+        const num = document.getElementById("leaveNo").value; const date = document.getElementById("leaveDate").value; const reason = document.getElementById("leaveReason").value;
+        if(!num || !date || !reason) { alert("กรุณากรอกข้อมูลการลาเวรให้ครบถ้วนก่อนน้า"); return; }
+        database.ref('leaves').push({ num: parseInt(num), date: date, reason: reason, status: "⏳ รออนุมัติ" }).then(() => { alert("🎫 ส่งใบลาเข้าตู้แอดมินเรียบร้อย"); document.getElementById("leaveReason").value = ""; });
+    }
+    database.ref('leaves').on('value', snapshot => {
+        const list = document.getElementById("leaveStatusList"); list.innerHTML = "";
+        snapshot.forEach(c => { const item = c.val(); list.innerHTML += `<div class="memo-item">เลขที่ ${item.num} แจ้งลาเวรวันที่ ${item.date} [<b>${item.status}</b>]<br><span style="color:#94a3b8;">เหตุผล: ${item.reason}</span></div>`; });
+    });
+    function listenAdminLeaves() {
+        database.ref('leaves').on('value', snapshot => {
+            const container = document.getElementById("adminLeaveContainer"); container.innerHTML = "";
+            if(!snapshot.exists()) { container.innerHTML = "ไม่มีใบลาค้างตรวจสอบ"; return; }
+            let hasPending = false;
+            snapshot.forEach(c => {
+                const item = c.val(); if(item.status === "⏳ รออนุมัติ") {
+                    hasPending = true;
+                    container.innerHTML += `<div class="memo-item" style="display:flex; justify-content:space-between; align-items:center;"><div>เลขที่ ${item.num} ขอลากระทันหันวันที่ ${item.date}<br>เหตุผล: ${item.reason}</div><div><button onclick="approveLeave('${c.key}', ${item.num})" style="background:#22c55e; border:none; padding:6px 12px; border-radius:5px; color:white; font-weight:bold; cursor:pointer; font-family:'Kanit';">อนุญาตผ่านเวร</button></div></div>`;
+                }
+            });
+            if(!hasPending) container.innerHTML = "ไม่มีใบลาค้างตรวจสอบค๊าบ";
+        });
+    }
+    function approveLeave(key, num) { database.ref('leaves/' + key).update({ status: "✅ อนุมัติผ่านเวรแล้ว" }).then(() => { database.ref('weeklyStats/' + num).set(1); alert("กดยอมรับและเปิดสถานะไฟเขียวให้เพื่อนแล้วจ้า!"); }); }
+
+    function submitLostItem() {
+        const name = document.getElementById("lostItemName").value.trim(); if(!name) return;
+        database.ref('lostItems').push({ detail: name, time: new Date().toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit'})+" น." }).then(() => { document.getElementById("lostItemName").value = ""; });
+    }
+    function listenLostItems() {
+        database.ref('lostItems').on('value', snapshot => {
+            const list = document.getElementById("lostItemsList"); list.innerHTML = "";
+            if(!snapshot.exists()) { list.innerHTML = "<p style='font-size:12px; color:#64748b;'>ไม่มีข้อมูลของหายในห้องค๊าบ</p>"; return; }
+            snapshot.forEach(c => { list.innerHTML += `<div class="memo-item" style="border-left-color:#a855f7;">📦 ${c.val().detail} <span style="font-size:11px; color:#94a3b8;">(พบตอน ${c.val().time})</span> <button onclick="deleteLost('${c.key}')" style="background:none; border:none; color:#f43f5e; float:right; cursor:pointer; font-weight:bold;">ส่งคืนเจ้าของแล้ว ❌</button></div>`; });
+        });
+    }
+    function deleteLost(key) { database.ref('lostItems').child(key).remove(); }
+
+    function submitConfession() {
+        const text = document.getElementById("confessText").value.trim(); if(!text) return;
+        database.ref('confessions').push({ text: text }).then(() => { document.getElementById("confessText").value = ""; });
+    }
+    function listenConfessions() {
+        database.ref('confessions').limitToLast(5).on('value', snapshot => {
+            const box = document.getElementById("confessionContainer"); box.innerHTML = "";
+            snapshot.forEach(c => { box.innerHTML += `<div class="memo-item" style="border-left-color:#e11d48; font-style:italic;">“ ${c.val().text} ” <span style="color:#f87171; font-size:11px;"><br>- ผู้สารภาพบาปนิรนาม</span></div>`; });
+        });
+    }
+
+    function listenLeaderboard() {
+        database.ref('leaderboardScores').on('value', snapshot => {
+            const container = document.getElementById("leaderboardContainer"); container.innerHTML = "";
+            const scores = snapshot.val() || {};
+            const days = ["วันจันทร์", "วันอังคาร", "วันพุธ", "วันพฤหัสบดี", "วันศุกร์"];
+            days.forEach(day => {
+                const score = scores[day] || 0;
+                container.innerHTML += `<div class="progress-container"><strong>🔵 กลุ่ม${day}</strong> (มีสะสม ${score} คะแนน)<div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${Math.min(score, 100)}%;"></div></div></div>`;
+            });
+        });
+    }
+    function listenStreak() { database.ref('streaks').on('value', s => { const data = s.val() || {}; let max = 0; Object.keys(data).forEach(k => { if(data[k]>max) max = data[k]; }); document.getElementById("streakShow").innerText = `🔥 Streak สัปดาห์ทำต่อเนื่องสูงสุด: ${max} วีค`; }); }
+    function loadAdminData() { database.ref('dutyLogs').orderByChild('timestamp').limitToLast(15).on('value', s => { const b = document.getElementById("reportTableBody"); b.innerHTML = ""; s.forEach(c => { const item = c.val(); b.innerHTML += `<tr><td><img src="${item.imageData || ''}" style="width:35px; height:35px; object-fit:cover; border-radius:5px;"></td><td style="text-align:left;"><b>${item.name}</b></td><td style="font-size:11px; color:#94a3b8;">${item.logTime}</td><td><button style="background:none; border:none; cursor:pointer;" onclick="deleteLog('${c.key}')">❌</button></td></tr>`; }); }); }
+    function deleteLog(key) { if (confirm("ต้องการลบประวัติเวรแถวนี้ใช่ไหม?")) database.ref('dutyLogs').child(key).remove(); }
+</script>
+
+</body>
+</html>
